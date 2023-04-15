@@ -1,0 +1,17 @@
+﻿  WindowsProject2.cpp
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(80,64): warning C4390: ';': 제어된 빈 문이 있습니다. 이 문이 필요합니까?
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(161,50): warning C4244: '=': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(162,51): warning C4244: '=': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(182,40): warning C4838: 'double'에서 'LONG'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(182,40): warning C4244: '초기화 중': 'double'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(182,64): warning C4838: 'double'에서 'LONG'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(182,64): warning C4244: '초기화 중': 'double'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(182,84): warning C4838: 'double'에서 'LONG'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(182,84): warning C4244: '초기화 중': 'double'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(182,104): warning C4838: 'double'에서 'LONG'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(182,104): warning C4244: '초기화 중': 'double'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(249,30): warning C4244: '인수': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(250,28): warning C4244: '인수': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(257,41): warning C4244: '인수': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\source\repos\WindowsProject2\WindowsProject2\WindowsProject2.cpp(258,40): warning C4244: '인수': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  WindowsProject2.vcxproj -> C:\Users\user\source\repos\WindowsProject2\x64\Debug\WindowsProject2.exe
