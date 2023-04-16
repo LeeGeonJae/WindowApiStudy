@@ -14,6 +14,7 @@ HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 // wchar_t 타입 변수 배열 100개
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
+HWND g_hWnd;
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 // ATOM = unsigned short
@@ -24,9 +25,6 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 // INT_PTR = long long
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-
-double GridX[32];
-double GridY[18];
 
 // 메인 함수 ( SAL )
 // 실행 된 프로세스의 시작 주소
@@ -61,6 +59,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // 메세지 구조체
     MSG msg;
 
+    SetTimer(g_hWnd, 10, 0, nullptr);
+
     // 발생한 윈도우의 정보까지도 msg구조체에 저장되어 있다
     // 하나의 프로세스가 여러개의 윈도우(창)을 보유하고 있을 수도 있다
     // 프로시저(처리기) 함수라고 하는데, 각자 윈도우(창)들은 자기한테 어떤 일이 발생했을 때 처리해주는 함수를 같이 들고 있다
@@ -83,6 +83,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
         }
     }
+
+    KillTimer(g_hWnd, 10);
 
     return (int) msg.wParam;
 }
@@ -133,114 +135,36 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
    // 윈도우의 정보를 szWindowClass의 키값으로 찾는다
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   g_hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
+   if (!g_hWnd)
    {
       return FALSE;
    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+   ShowWindow(g_hWnd, nCmdShow);
+   UpdateWindow(g_hWnd);
 
    return TRUE;
 }
 
-void Marker(LONG x, LONG y, HWND hwnd)
+#include <vector>
+
+using std::vector;
+
+struct tObjInfo
 {
-    int GridXNumber = 0;
-    int GridYNumber = 0;
-    HDC hdc;
-    RECT ClientRect;
-        
-    GetClientRect(hwnd, &ClientRect);
+    POINT g_ptObjPos = { 500, 300 };
+    POINT g_ptObjScale = { 100, 100 };
+};
 
-    hdc = GetDC(hwnd);
+vector<tObjInfo> g_vecInfo;
 
-    GridXNumber = (x / (double)ClientRect.right) * 32;
-    GridYNumber = (y / (double)ClientRect.bottom) * 18;
+POINT g_ptLT;       // 좌 상단
+POINT g_ptRB;       // 우 하단
 
-    RECT rect = { GridX[GridXNumber - 1], GridY[GridYNumber - 1], GridX[GridXNumber], GridY[GridYNumber] };
-    HBRUSH hbr = CreateSolidBrush(RGB(255, 255, 255));
-    FillRect(hdc, &rect, hbr);
-
-    ReleaseDC(hwnd, hdc);
-    DeleteObject(hbr);
-}
-
-void DrawMarker(HWND hWnd, LPARAM lParam)
-{
-    // static 변수 선언 및 초기화
-    static POINT ptMouseDown[32];
-    static int index;
-
-    RECT rc;
-    HRGN hrgn;
-    POINTS ptTmp;
-
-    // 마우스 클릭 횟수가 32 이상일 경우 함수 종료
-    if (index >= 32) return;
-
-    // 클라이언트 영역 크기 구하기
-    GetClientRect(hWnd, &rc);
-
-    // 클라이언트 영역을 표현하는 영역 객체 생성
-    hrgn = CreateRectRgn(rc.left, rc.top,
-        rc.right, rc.bottom);
-
-    // lParam 변수를 POINTS 구조체로 변환
-    ptTmp = MAKEPOINTS(lParam);
-
-    // ptMouseDown 배열에 마우스 클릭 좌표 저장
-    ptMouseDown[index].x = (int)ptTmp.x;
-    ptMouseDown[index].y = (int)ptTmp.y;
-
-    // 클라이언트 영역에 마우스 클릭이 발생한 경우
-    if (PtInRegion(hrgn, ptMouseDown[index].x, ptMouseDown[index].y))
-    {
-        // 마커 그리기 함수 호출
-        Marker(ptMouseDown[index].x, ptMouseDown[index].y, hWnd);
-
-        // 마우스 클릭 횟수 증가
-        index++;
-    }
-}
-
-void DrawParabola(HWND hWnd, HDC hdc)
-{
-    RECT rect;
-
-    HPEN hNewPen, hPrevPen;
-
-    double a = 0.01;
-    double b = 0;
-    double c = 0;
-
-    hNewPen = CreatePen(PS_DOT, 2, RGB(255, 255, 0)); //hNewPen 펜 생성 -> 옵션(도트), 굵기2, 색상 R:255 G:0 B:0
-    hPrevPen = (HPEN)SelectObject(hdc, hNewPen); //hdc 영역에 새로운 펜을 적용후 이전에 있던 펜의 정보를 hPrevPen에 저장
-
-    SelectObject(hdc, hPrevPen);
-
-    GetClientRect(hWnd, &rect);
-
-    for (int i = 0; i < 32; i++)
-    {
-        GridX[i] = rect.right / 32.0 * (i + 1);
-        
-        MoveToEx(hdc, GridX[i], rect.top, NULL);
-        LineTo(hdc, GridX[i], rect.bottom);
-    }
-
-    for (int i = 0; i < 18; i++)
-    {
-        GridY[i] = rect.bottom / 18.0 * (i + 1);
-
-        MoveToEx(hdc, rect.left, GridY[i], NULL);
-        LineTo(hdc, rect.right, GridY[i]);
-    }
-    // Draw the axes -> 데카르트 좌표계
-}
+bool bLbtnDown = false;
 
 //
 //  함수: WndProc(HWND, UINT, WPARAM, LPARAM)
@@ -273,23 +197,116 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
-    case WM_PAINT:
+    case WM_PAINT:  // 무효화 영역(Invalidate)이 발생한 경우
         {
             PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
+           
+            // Device Context 만들어서 ID를 반환
+            HDC hdc = BeginPaint(hWnd, &ps); // Device Context (그리기)
+            // DC의 목적지는 hWnd
+            // DC의 펜은 기본펜(black)
+            // DC의 브러쉬는 기본 브러쉬(White)
 
-            // 작업 영역에서 좌표 1만큼의 단위는 픽셀 단위이다 ( 해상도 )
-            // 픽셀 하나하나는 메모리이다
-            DrawParabola(hWnd, hdc);
+            // 직접 펜을 만들어서 DC에 지급
+            HPEN hRedPen = CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
+            HBRUSH hBlueBrush = CreateSolidBrush(RGB(0, 0, 255));
 
+            // 기본 펜 ID 값을 받아 둠
+            HPEN hDefalutPen = (HPEN)SelectObject(hdc, hRedPen);
+            HBRUSH hDefalutBrush = (HBRUSH)SelectObject(hdc, hBlueBrush);
+
+            // 변경된 펜과 브러쉬로 사각형 그림
+            if (bLbtnDown)
+            {
+                Rectangle(hdc
+                    , g_ptLT.x, g_ptLT.y
+                    , g_ptRB.x, g_ptRB.y);
+            }
+
+            // 추가된 사각형들도 그려준다
+            for (int i = 0; i < g_vecInfo.size(); i++)
+            {
+                Rectangle(hdc
+                    , g_vecInfo[i].g_ptObjPos.x - g_vecInfo[i].g_ptObjScale.x / 2
+                    , g_vecInfo[i].g_ptObjPos.y - g_vecInfo[i].g_ptObjScale.y / 2
+                    , g_vecInfo[i].g_ptObjPos.x + g_vecInfo[i].g_ptObjScale.x / 2
+                    , g_vecInfo[i].g_ptObjPos.y + g_vecInfo[i].g_ptObjScale.y / 2);
+            }
+
+            // DC의 펜을 원래 펜으로 되돌림
+            SelectObject(hdc, hDefalutPen);
+            SelectObject(hdc, hDefalutBrush);
+
+            // 다 쓴 Red펜 삭제 요청
+            DeleteObject(hRedPen);
+            DeleteObject(hBlueBrush);
+            
+            // 윈도우 핸들
+            // HDC ?
+            
+            // 그리기 종료
             EndPaint(hWnd, &ps);
         }
         break;
-    case WM_LBUTTONDOWN:
 
-        // Create the region from the client area.  
-        DrawMarker(hWnd, lParam);
+    case WM_KEYDOWN:
+    {
+        switch (wParam)
+        {
+        case VK_UP:
+            //g_ptObjPos.y -= 10;
+            InvalidateRect(hWnd, nullptr, true);
+            break;
+        case VK_DOWN:
+            //g_ptObjPos.y += 10;
+            InvalidateRect(hWnd, nullptr, true);
+            break;
+        case VK_RIGHT:
+            //g_ptObjPos.x += 10;
+            InvalidateRect(hWnd, nullptr, true);
+            break;
+        case VK_LEFT:
+            //g_ptObjPos.x -= 10;
+            InvalidateRect(hWnd, nullptr, true);
+            break;
+        }
+    }
+        break;
+
+        // 마우스 클릭을 했을 때, lParam에서 마우스의 좌표가 들어간다
+        // lParam은 'long' 타입 4바이트 자료형이다. 
+        // 마우스 좌표는 2바이트 씩 나눠서 저장한다
+    case WM_LBUTTONDOWN:
+    {
+        g_ptLT.x = LOWORD(lParam); // 비트 연산자로 처음부터 16비트까지 데이터를 잡아준다
+        g_ptLT.y = HIWORD(lParam); // 비트 연산자로 16비트부터 32비트까지 데이터를 잡아준다
+        bLbtnDown = true;
+    }
+        break;
+
+    case WM_MOUSEMOVE:
+        g_ptRB.x = LOWORD(lParam);
+        g_ptRB.y = HIWORD(lParam);
+        InvalidateRect(hWnd, nullptr, true);
+        break;
+
+    case WM_LBUTTONUP:
+    {
+        tObjInfo info = {};
+        info.g_ptObjPos.x = (g_ptLT.x + g_ptRB.x) / 2;
+        info.g_ptObjPos.y = (g_ptLT.y + g_ptRB.y) / 2;
+
+        info.g_ptObjScale.x = abs(g_ptLT.x - g_ptRB.x);
+        info.g_ptObjScale.y = abs(g_ptLT.y - g_ptRB.y);
+
+        g_vecInfo.push_back(info);
+        bLbtnDown = false;
+        InvalidateRect(hWnd, nullptr, true);
+    }
+    break;
+
+    case WM_TIMER:
+
         break;
     case WM_DESTROY:
         PostQuitMessage(0);
