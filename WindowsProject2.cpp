@@ -3,6 +3,7 @@
 
 #include "framework.h"
 #include "WindowsProject2.h"
+#include "CCore.h"
 #include <wingdi.h>
 #include <math.h>
 
@@ -39,6 +40,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: 여기에 코드를 입력합니다.
+    CCore* C1 = CCore::GetInstance();
+
 
     // 전역 문자열을 초기화합니다.
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -59,32 +62,36 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // 메세지 구조체
     MSG msg;
 
-    SetTimer(g_hWnd, 10, 0, nullptr);
+    // GetMessage : 메세지를 받으면 메세지 큐로 그 메세지를 가져오겠다
+    // msg.message == WM_QUIT 인 경우 false를 반환 -> 프로그램 종료
+    
+    // PeekMessage : 메세지 유무와 관계없이 반환
+    // 메세지가 있으면 true, 메세지가 없으면 false
+    // 메세지큐에서 메세지를 확인한 경우 true, 메세지큐에 메세지가 없는 경우 false를 반환한다
 
-    // 발생한 윈도우의 정보까지도 msg구조체에 저장되어 있다
-    // 하나의 프로세스가 여러개의 윈도우(창)을 보유하고 있을 수도 있다
-    // 프로시저(처리기) 함수라고 하는데, 각자 윈도우(창)들은 자기한테 어떤 일이 발생했을 때 처리해주는 함수를 같이 들고 있다
-    //msg.hwnd;
-
-    // 기본 메시지 루프입니다:
-    // 해당 프로세스가 포커스를 받고 있을 때 메세지를 받고 있다
-    // GetMassge : 해당 프로그램 쪽으로 발생한 메세지들을 메세지 큐에 받아놓고 꺼내놓는 것이다. 
-    // 메세지큐에서 메세지 확인할때까지 대기
-    // 해당 GetMassge는 Queue 메모리 형태로 되어있기 때문에 가장 처음 받은 것부터 처리한다
-    // GetMassge의 정보를 메세지 구조체에 채우기 위해서 &msg 주소를 보내준다
-    // msg.massage == WM_QUIT 일때만 false를 반환 -> 프로그램 종료
-    // window가 destory -> msg.massage = WM_QUIT -> 프로그램 종료
-    while (GetMessage(&msg, nullptr, 0, 0))
+    while (true)
 	{
-
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg));
+        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
         {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            if (msg.message == WM_QUIT)
+                break;
+
+            if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg));
+            {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+        }
+
+        // 메세지가 발생하지 않는 대부분의 시간
+        else
+        {
+            // Game 코드 수행
+            // 디자인 패턴(설계 유형)
+            // 싱글톤 패턴
+
         }
     }
-
-    KillTimer(g_hWnd, 10);
 
     return (int) msg.wParam;
 }
